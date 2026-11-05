@@ -16,6 +16,9 @@ def ingest(source, output, limit=None):
     (output/'partitions').mkdir(parents=True, exist_ok=True)
     manifest_path = output/'manifest.json'
     manifest = load_json(manifest_path) if manifest_path.exists() else {'schema_version':1,'files':{}}
+    missing_sources=set(manifest['files'])-{p.name for p in source.glob('Ticket-Data-*.csv')}
+    if missing_sources:
+        raise ValueError('Previously ingested sources are missing; review before rebuilding: '+', '.join(sorted(missing_sources)))
     con=connection()
     audits=[]
     for path in files:
@@ -65,6 +68,7 @@ def ingest(source, output, limit=None):
         con.execute(f'''CREATE OR REPLACE TEMP VIEW classified AS SELECT *, CASE
             WHEN ticket_type IS NULL OR ticket_type NOT IN ({allowed}) THEN 'excluded_ticket_type'
             WHEN id IS NULL OR duty IS NULL THEN 'invalid_transaction_key'
+            WHEN duty!=DATE {literal(path.stem[-10:])} THEN 'duty_date_filename_mismatch'
             WHEN ticket_ts IS NULL OR cast(ticket_ts AS DATE)<duty OR cast(ticket_ts AS DATE)>duty+1
                 THEN 'invalid_timestamp'
             WHEN passengers IS NULL OR NOT isfinite(passengers) OR passengers<=0 OR passengers!=floor(passengers)

@@ -1,0 +1,595 @@
+{
+  "data": {
+    "files": 31,
+    "raw_records": 67943937,
+    "accepted_passengers": 77374812.0,
+    "quality_records": {
+      "excluded_ticket_type": 148674,
+      "accepted": 67795257,
+      "invalid_timestamp": 4,
+      "missing_route_identity": 2
+    },
+    "independent_checks_passed": true,
+    "independent_raw_duty_check": {
+      "duty_filename_consistency_passed": true,
+      "records_checked": 67943937,
+      "ticket_types": {
+        "Adult Ticket": 31139923,
+        "Difference Fare Ticket": 1519,
+        "Disable Person Escort Ticket": 9355,
+        "Women Ticket": 35290539,
+        "Senior Citizen Ticket": 1109105,
+        "Luggage Ticket": 141203,
+        "Disable Person Ticket": 238534,
+        "Transgender Ticket": 7807,
+        "SHG Luggage Ticket": 5952
+      }
+    },
+    "training_day_of_week_summary": [
+      {
+        "weekday": 1,
+        "average_daily_passengers": 2679818.5,
+        "dates": 2
+      },
+      {
+        "weekday": 2,
+        "average_daily_passengers": 2601585.5,
+        "dates": 2
+      },
+      {
+        "weekday": 3,
+        "average_daily_passengers": 2568976.0,
+        "dates": 2
+      },
+      {
+        "weekday": 4,
+        "average_daily_passengers": 2570304.0,
+        "dates": 2
+      },
+      {
+        "weekday": 5,
+        "average_daily_passengers": 2582098.5,
+        "dates": 2
+      },
+      {
+        "weekday": 6,
+        "average_daily_passengers": 2507214.5,
+        "dates": 2
+      },
+      {
+        "weekday": 7,
+        "average_daily_passengers": 2148408.0,
+        "dates": 1
+      }
+    ]
+  },
+  "boarding_forecast": {
+    "label_kind": "boardings",
+    "grouping": "weekday_weekend",
+    "training_dates": "March 2\u201314 (first five days supply initial feature history)",
+    "validation_dates": "March 15\u201321",
+    "test_dates": "March 22\u201328",
+    "selected_rounds": 100,
+    "validation": {
+      "baseline": {
+        "rows": 497640,
+        "actual_passengers": 17243975.0,
+        "mae": 11.971179405361287,
+        "wape": 0.3454735766715036,
+        "mean_signed_error": 1.1677666579562032,
+        "underpredicted_passengers": 2688105.1598093333
+      },
+      "xgboost": {
+        "rows": 497640,
+        "actual_passengers": 17243975.0,
+        "mae": 12.53489339336337,
+        "wape": 0.36174167199113594,
+        "mean_signed_error": 1.3195131066698125,
+        "underpredicted_passengers": 2790610.9229350914
+      }
+    },
+    "test": {
+      "baseline": {
+        "rows": 504480,
+        "actual_passengers": 17667104.0,
+        "mae": 11.423748350031364,
+        "wape": 0.326202447646418,
+        "mean_signed_error": -0.1675618732865458,
+        "underpredicted_passengers": 2923792.0907297092
+      },
+      "xgboost": {
+        "rows": 504480,
+        "actual_passengers": 17667104.0,
+        "mae": 11.97050057146354,
+        "wape": 0.34181482875132946,
+        "mean_signed_error": -1.2029650909629106,
+        "underpredicted_passengers": 3322874.978690448
+      }
+    },
+    "busy_hours": {
+      "baseline": {
+        "rows": 126120,
+        "actual_passengers": 7680498.0,
+        "mae": 18.637916239588886,
+        "wape": 0.30604968533771515,
+        "mean_signed_error": -0.5363863448420697,
+        "underpredicted_passengers": 1209131.5209742165
+      },
+      "xgboost": {
+        "rows": 126120,
+        "actual_passengers": 7680498.0,
+        "mae": 19.387227225064912,
+        "wape": 0.3183539788207987,
+        "mean_signed_error": -3.810301515411869,
+        "underpredicted_passengers": 1462836.1623744657
+      }
+    },
+    "daily_test": [
+      {
+        "date": "2026-03-22",
+        "day_type": "weekend",
+        "baseline": {
+          "rows": 65808,
+          "actual_passengers": 2114456.0,
+          "mae": 12.48271787824397,
+          "wape": 0.38849836465335724,
+          "mean_signed_error": 3.0489176830400706,
+          "underpredicted_passengers": 310409.7616229891
+        },
+        "xgboost": {
+          "rows": 65808,
+          "actual_passengers": 2114456.0,
+          "mae": 12.68276081402417,
+          "wape": 0.3947242806893606,
+          "mean_signed_error": 3.1611488743191636,
+          "underpredicted_passengers": 313299.1192640536
+        }
+      },
+      {
+        "date": "2026-03-23",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 74160,
+          "actual_passengers": 2719105.0,
+          "mae": 11.37387771570734,
+          "wape": 0.3102075026145943,
+          "mean_signed_error": -1.7509096569269182,
+          "underpredicted_passengers": 486667.1157772783
+        },
+        "xgboost": {
+          "rows": 74160,
+          "actual_passengers": 2719105.0,
+          "mae": 12.250422472367852,
+          "wape": 0.3341141039241956,
+          "mean_signed_error": -3.315373343337201,
+          "underpredicted_passengers": 577179.7088463434
+        }
+      },
+      {
+        "date": "2026-03-24",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 73680,
+          "actual_passengers": 2639129.0,
+          "mae": 10.965082824295463,
+          "wape": 0.30612649191990604,
+          "mean_signed_error": -0.5937988913602817,
+          "underpredicted_passengers": 425829.2024047576
+        },
+        "xgboost": {
+          "rows": 73680,
+          "actual_passengers": 2639129.0,
+          "mae": 11.794120032355963,
+          "wape": 0.32927180292588476,
+          "mean_signed_error": -2.163485135386579,
+          "underpredicted_passengers": 514198.1743796352
+        }
+      },
+      {
+        "date": "2026-03-25",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 72840,
+          "actual_passengers": 2576571.0,
+          "mae": 11.118031371983518,
+          "wape": 0.3143082046391423,
+          "mean_signed_error": 0.13938884462756349,
+          "underpredicted_passengers": 399842.16084630386
+        },
+        "xgboost": {
+          "rows": 72840,
+          "actual_passengers": 2576571.0,
+          "mae": 11.913546007184916,
+          "wape": 0.3367975076810805,
+          "mean_signed_error": -1.5522005607981824,
+          "underpredicted_passengers": 490422.49000594445
+        }
+      },
+      {
+        "date": "2026-03-26",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 72648,
+          "actual_passengers": 2561447.0,
+          "mae": 11.135969207881823,
+          "wape": 0.3158394028899285,
+          "mean_signed_error": 0.33565302336617536,
+          "underpredicted_passengers": 392310.6850863464
+        },
+        "xgboost": {
+          "rows": 72648,
+          "actual_passengers": 2561447.0,
+          "mae": 11.99609503352585,
+          "wape": 0.3402343722105458,
+          "mean_signed_error": -1.6268133693920979,
+          "underpredicted_passengers": 494838.52482759155
+        }
+      },
+      {
+        "date": "2026-03-27",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 73944,
+          "actual_passengers": 2563854.0,
+          "mae": 10.580247653710284,
+          "wape": 0.3051444553808264,
+          "mean_signed_error": 0.3776280939973049,
+          "underpredicted_passengers": 377211.2503617083
+        },
+        "xgboost": {
+          "rows": 73944,
+          "actual_passengers": 2563854.0,
+          "mae": 11.274813199286141,
+          "wape": 0.32517638961033446,
+          "mean_signed_error": -1.069540201444886,
+          "underpredicted_passengers": 456395.43393182755
+        }
+      },
+      {
+        "date": "2026-03-28",
+        "day_type": "weekend",
+        "baseline": {
+          "rows": 71400,
+          "actual_passengers": 2492542.0,
+          "mae": 12.451073766750216,
+          "wape": 0.3566666748026575,
+          "mean_signed_error": -2.437495270513811,
+          "underpredicted_passengers": 531521.9146303257
+        },
+        "xgboost": {
+          "rows": 71400,
+          "actual_passengers": 2492542.0,
+          "mae": 11.957830808695904,
+          "wape": 0.3425375057836087,
+          "mean_signed_error": -1.3906713603531833,
+          "underpredicted_passengers": 476541.5274350524
+        }
+      }
+    ],
+    "selected_model_from_validation": "baseline",
+    "selection_policy": "Lower validation MAE; test never selects a model",
+    "final_test_model_training_cutoff": "2026-03-21",
+    "test_policy": "Frozen model weights; daily features update using preceding complete dates; assumes historical data available without delivery lag",
+    "limitations": [
+      "March 1 excluded from targets because prior-month duty spillover is absent",
+      "Only route-days with recorded tickets are evaluated; absent route-days remain unknown",
+      "No independent ground truth for actual bus occupancy or missing destinations",
+      "Forecasting assumes prior calendar-day extracts are available; deployment latency unconfirmed"
+    ]
+  },
+  "route_direction_aggregation_of_same_predictions": {
+    "baseline": {
+      "rows": 279840,
+      "actual_passengers": 17667104.0,
+      "mae": 18.687292668515678,
+      "wape": 0.29599938848819973,
+      "mean_signed_error": -0.30207123297454486,
+      "underpredicted_passengers": 2656991.797096512
+    },
+    "xgboost": {
+      "rows": 279840,
+      "actual_passengers": 17667104.0,
+      "mae": 19.326440341970226,
+      "wape": 0.30612323702271454,
+      "mean_signed_error": -2.168638611667271,
+      "underpredicted_passengers": 3007591.447192958
+    }
+  },
+  "section_proxy_forecast": {
+    "label_kind": "segments",
+    "grouping": "weekday_weekend",
+    "training_dates": "March 2\u201314 (first five days supply initial feature history)",
+    "validation_dates": "March 15\u201321",
+    "test_dates": "March 22\u201328",
+    "selected_rounds": 100,
+    "validation": {
+      "baseline": {
+        "rows": 19824,
+        "actual_passengers": 4412859.379912281,
+        "mae": 52.09502471215441,
+        "wape": 0.23402779943427013,
+        "mean_signed_error": 7.11313842496031,
+        "underpredicted_passengers": 445860.45687866793
+      },
+      "xgboost": {
+        "rows": 19824,
+        "actual_passengers": 4412859.379912281,
+        "mae": 52.384555182080646,
+        "wape": 0.2353284645000878,
+        "mean_signed_error": 2.568616483127808,
+        "underpredicted_passengers": 493775.58438402053
+      }
+    },
+    "test": {
+      "baseline": {
+        "rows": 19824,
+        "actual_passengers": 4406967.243131505,
+        "mae": 49.27917356533952,
+        "wape": 0.22167406355966401,
+        "mean_signed_error": 5.134762057418115,
+        "underpredicted_passengers": 437559.406866517
+      },
+      "xgboost": {
+        "rows": 19824,
+        "actual_passengers": 4406967.243131505,
+        "mae": 49.445706718837805,
+        "wape": 0.22242318490611726,
+        "mean_signed_error": -2.2814467407582333,
+        "underpredicted_passengers": 512719.545091516
+      }
+    },
+    "busy_hours": {
+      "baseline": {
+        "rows": 4956,
+        "actual_passengers": 1701688.9923825474,
+        "mae": 69.7726097160007,
+        "wape": 0.20320578866080108,
+        "mean_signed_error": 5.771346859783946,
+        "underpredicted_passengers": 158595.12935770513
+      },
+      "xgboost": {
+        "rows": 4956,
+        "actual_passengers": 1701688.9923825474,
+        "mae": 69.70954998883663,
+        "wape": 0.2030221334751449,
+        "mean_signed_error": -8.907636938895976,
+        "underpredicted_passengers": 194813.3892069214
+      }
+    },
+    "daily_test": [
+      {
+        "date": "2026-03-22",
+        "day_type": "weekend",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 578881.2887695404,
+          "mae": 49.505460512056864,
+          "wape": 0.2421903538602025,
+          "mean_signed_error": 19.641754030026913,
+          "underpredicted_passengers": 42287.00837855441
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 578881.2887695404,
+          "mae": 47.02959508783835,
+          "wape": 0.23007793803779672,
+          "mean_signed_error": 13.759620696033581,
+          "underpredicted_passengers": 47110.283738795566
+        }
+      },
+      {
+        "date": "2026-03-23",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 716926.3054955538,
+          "mae": 57.988394296833185,
+          "wape": 0.22906556976608256,
+          "mean_signed_error": -24.394724871510217,
+          "underpredicted_passengers": 116654.49674237423
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 716926.3054955538,
+          "mae": 57.6085547129928,
+          "wape": 0.22756512865631964,
+          "mean_signed_error": -30.73297954171583,
+          "underpredicted_passengers": 125091.61250466741
+        }
+      },
+      {
+        "date": "2026-03-24",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 637105.8469019702,
+          "mae": 43.358970402581306,
+          "wape": 0.19273501377708127,
+          "mean_signed_error": 5.315135614309276,
+          "underpredicted_passengers": 53870.0700601932
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 637105.8469019702,
+          "mae": 47.03594684729921,
+          "wape": 0.20907954638822734,
+          "mean_signed_error": -4.686977405191247,
+          "underpredicted_passengers": 73239.66074152649
+        }
+      },
+      {
+        "date": "2026-03-25",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 628139.1057582335,
+          "mae": 45.63214333504276,
+          "wape": 0.20573504935478568,
+          "mean_signed_error": 8.168702733447699,
+          "underpredicted_passengers": 53048.23189185861
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 628139.1057582335,
+          "mae": 50.65727922157313,
+          "wape": 0.22839115323399786,
+          "mean_signed_error": -0.45268208025722395,
+          "underpredicted_passengers": 72371.70520339179
+        }
+      },
+      {
+        "date": "2026-03-26",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 607603.3905476676,
+          "mae": 42.23978479021742,
+          "wape": 0.1968768976388901,
+          "mean_signed_error": 14.966197783060482,
+          "underpredicted_passengers": 38619.39920213422
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 607603.3905476676,
+          "mae": 41.78940546760456,
+          "wape": 0.19477770882348544,
+          "mean_signed_error": 3.744828781195561,
+          "underpredicted_passengers": 53871.12058795514
+        }
+      },
+      {
+        "date": "2026-03-27",
+        "day_type": "weekday",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 613734.3540066237,
+          "mae": 44.531864670549986,
+          "wape": 0.20548668967883207,
+          "mean_signed_error": 12.01361493586686,
+          "underpredicted_passengers": 46045.84162431132
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 613734.3540066237,
+          "mae": 47.66545830754478,
+          "wape": 0.2199462634700582,
+          "mean_signed_error": 2.4724077219176483,
+          "underpredicted_passengers": 63993.35962924802
+        }
+      },
+      {
+        "date": "2026-03-28",
+        "day_type": "weekend",
+        "baseline": {
+          "rows": 2832,
+          "actual_passengers": 624576.9516519165,
+          "mae": 61.697596950095125,
+          "wape": 0.2797535101167918,
+          "mean_signed_error": 0.23265417672578262,
+          "underpredicted_passengers": 87034.35896709102
+        },
+        "xgboost": {
+          "rows": 2832,
+          "actual_passengers": 624576.9516519165,
+          "mae": 54.33370738701179,
+          "wape": 0.2463636528902407,
+          "mean_signed_error": -0.07434535729011757,
+          "underpredicted_passengers": 77041.80268593151
+        }
+      }
+    ],
+    "selected_model_from_validation": "baseline",
+    "selection_policy": "Lower validation MAE; test never selects a model",
+    "final_test_model_training_cutoff": "2026-03-21",
+    "test_policy": "Frozen model weights; daily features update using preceding complete dates; assumes historical data available without delivery lag",
+    "limitations": [
+      "March 1 excluded from targets because prior-month duty spillover is absent",
+      "Only route-days with recorded tickets are evaluated; absent route-days remain unknown",
+      "No independent ground truth for actual bus occupancy or missing destinations",
+      "Forecasting assumes prior calendar-day extracts are available; deployment latency unconfirmed"
+    ]
+  },
+  "section_reconstruction": {
+    "section_count": 118,
+    "cohort_passengers": 4143997.0,
+    "reconstructed_journey_passengers": 4140604.0000000196,
+    "unreconstructed_journey_passengers": 3392.999999980442,
+    "crossing_reconciliation": {
+      "expected": 19726530.576284867,
+      "actual": 19726530.576285064,
+      "passed": true
+    },
+    "masked_known_destination_validation": {
+      "evaluated_known_passengers": 380936.0,
+      "top_destination_accuracy": 0.3792421824138438,
+      "unsupported_origin_fraction": 0.0,
+      "mean_absolute_stage_number_error": 2.3683157338350194
+    },
+    "label_kind": "estimated_stage_interval_passenger_crossings_by_boarding_hour",
+    "limitations": [
+      "Stage intervals are not yet matched to geographic stop-to-stop segments",
+      "Missing destination estimates may be biased for free-ticket passengers",
+      "Unmatched destinations/stages are excluded and reported, not assumed zero",
+      "No crossing-time or full-service denominator is available",
+      "Prediction validation against these labels is not independent crowding validation"
+    ]
+  },
+  "section_route_variants": [
+    {
+      "direction": "500 - UP",
+      "origin": "TAMBARAM WEST",
+      "terminus": "CHENGALPET"
+    },
+    {
+      "direction": "57 - DOWN",
+      "origin": "REDHILLS",
+      "terminus": "VALLALAR NAGAR"
+    },
+    {
+      "direction": "57 - UP",
+      "origin": "VALLALAR NAGAR",
+      "terminus": "REDHILLS"
+    },
+    {
+      "direction": "500 - DOWN",
+      "origin": "CHENGALPET",
+      "terminus": "TAMBARAM WEST"
+    },
+    {
+      "direction": "32B - DOWN",
+      "origin": "VIVEKANANDA HOUSE",
+      "terminus": "KORUKKUPET R.S"
+    },
+    {
+      "direction": "32B - UP",
+      "origin": "KORUKKUPET R.S",
+      "terminus": "VIVEKANANDA HOUSE"
+    },
+    {
+      "direction": "70V - DOWN",
+      "origin": "KCBT - KILAMBAKKAM",
+      "terminus": "M.G.R.KOYAMBEDU"
+    },
+    {
+      "direction": "70V - UP",
+      "origin": "M.G.R.KOYAMBEDU",
+      "terminus": "KCBT - KILAMBAKKAM"
+    },
+    {
+      "direction": "102P - UP",
+      "origin": "ISLAND GROUND",
+      "terminus": "PERUMBAKKAM TNUHDB"
+    },
+    {
+      "direction": "102K - DOWN",
+      "origin": "KANNAGI NAGAR TNUHDB",
+      "terminus": "ISLAND GROUND"
+    }
+  ],
+  "release_scope": {
+    "geographic_mapping": "not implemented",
+    "driver_mobile_ui": "not implemented",
+    "service_planning": "conditional arithmetic, no verified service plan available",
+    "actual_crowding_validation": "unavailable; occupancy outputs remain estimates"
+  }
+}

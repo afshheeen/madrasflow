@@ -76,7 +76,8 @@ def main():
             subprocess.run(['git','remote','add','origin',remote],cwd=root,check=True)
         elif current.stdout.strip()!=remote:
             raise SystemExit('Existing origin differs; refusing to overwrite it.')
-        subprocess.run(['git','-c',f'credential.https://github.com.username={args.owner}',
-                        'push','-u','origin','main'],cwd=root,check=True)
+        command=['git','-c',f'credential.https://github.com.username={args.owner}']
+        if os.name=='nt': command+=['-c','http.sslBackend=schannel']
+        subprocess.run(command+['push','-u','origin','main'],cwd=root,check=True)
 
 if __name__=='__main__': main()

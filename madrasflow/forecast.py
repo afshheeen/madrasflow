@@ -19,7 +19,7 @@ def prepare_frame(path, label_kind='boardings'):
     con.close()
     df['date']=pd.to_datetime(df['date'])
     # Incomplete external month-boundary duty spillovers must not become target labels.
-    df=df[(df.date>=pd.Timestamp('2026-03-02')) & (df.date<=pd.Timestamp('2026-03-31'))].copy()
+    df=df[df.date>=pd.Timestamp('2026-03-02')].copy()
     df['is_weekend']=(df.date.dt.dayofweek>=5).astype('int8')
     return df.sort_values(['series_id','hour','date']).reset_index(drop=True)
 
@@ -110,12 +110,14 @@ def train_and_evaluate(path,output,label_kind='boardings',rounds=100):
         evals=[(matrix(val,True),'validation')],early_stopping_rounds=15,verbose_eval=False)
     selected_rounds=candidate.best_iteration+1
     candidate=candidate[:selected_rounds]
+    print(f'{label_kind}: validation selected {selected_rounds} boosting rounds',flush=True)
     valpred=evaluate(candidate,df,valdays,categories)
     valmetrics={name:metrics(valpred.passengers,valpred[name]) for name in ['baseline','xgboost']}
     champion='xgboost' if valmetrics['xgboost']['mae']<valmetrics['baseline']['mae'] else 'baseline'
     # Freeze settings using validation; refit once through March 21, then keep weights fixed for test.
     categories=sorted(df.loc[df.date<=validation_end,'series_id'].unique())
     finaltrain=training_features(df,validation_end,categories)
+    print(f'{label_kind}: refitting through {validation_end.date()} on {len(finaltrain):,} examples',flush=True)
     fitted=xgb.train(params,matrix(finaltrain,True),num_boost_round=selected_rounds,verbose_eval=False)
     testdays=sorted(df.loc[(df.date>validation_end)&(df.date<=test_end),'date'].unique())
     test=evaluate(fitted,df,testdays,categories)
@@ -149,6 +151,32 @@ def train_and_evaluate(path,output,label_kind='boardings',rounds=100):
     print(f'{label_kind}: selected {champion}; test WAPE {testmetrics[champion]["wape"]:.3%}',flush=True)
     return report
 
+def refit_candidate(path,approved_model_dir,output,cutoff):
+    """Retrain a separate candidate with frozen settings, without claiming promotion."""
+    approved_model_dir,output=Path(approved_model_dir).resolve(),Path(output).resolve()
+    if approved_model_dir==output or (output/'model.ubj').exists():
+        raise ValueError('Use a new candidate directory; current models are not overwritten')
+    metadata=load_json(approved_model_dir/'model_metadata.json')
+    evaluated=load_json(approved_model_dir/'metrics.json')
+    df=prepare_frame(path,metadata['label_kind'])
+    df=df[df.date<=pd.Timestamp(cutoff)]
+    if df.empty or df.date.max()<pd.Timestamp(cutoff):
+        raise ValueError('Requested completed cutoff is not present in the dataset')
+    categories=sorted(df.series_id.unique())
+    train=training_features(df,pd.Timestamp(cutoff),categories)
+    params={'objective':'count:poisson','eval_metric':'mae','tree_method':'hist',
+            'max_depth':6,'eta':0.08,'min_child_weight':20,'lambda':5,
+            'subsample':0.9,'colsample_bytree':1.0,'seed':42,'nthread':4}
+    fitted=xgb.train(params,matrix(train,True),num_boost_round=evaluated['selected_rounds'])
+    output.mkdir(parents=True,exist_ok=True)
+    fitted.save_model(output/'model.ubj')
+    write_json(output/'model_metadata.json',{**metadata,'categories':categories,
+        'training_cutoff':cutoff,'status':'candidate_requires_later_date_validation'})
+    write_json(output/'refit_report.json',{'source_evaluated_model':str(approved_model_dir),
+        'training_cutoff':cutoff,'training_rows':len(train),'selected_rounds':evaluated['selected_rounds'],
+        'automatically_promoted':False,'note':'No improvement claim: compare against current model on later completed days before promotion.'})
+    return output
+
 def export_profiles(path,model_dir,out,cutoff='2026-03-31'):
     """Weekday/weekend reference profiles, conditioned on one explicit data-through cutoff."""
     model_dir=Path(model_dir)
@@ -173,6 +201,13 @@ def export_profiles(path,model_dir,out,cutoff='2026-03-31'):
         target['day_type']='weekend' if weekend else 'weekday'
         target['data_through']=cutoff
         target['profile_kind']='reference_profile_at_cutoff_not_specific_date_forecast'
+        target['target_kind']=('estimated_stage_interval_crossings_by_boarding_hour'
+                               if metadata['label_kind']=='segments' else 'ticketed_passengers_by_issue_hour')
+        target['historical_comparable_days']=x.history_days.values
+        target['forecast_method']=np.where(x.route_code.isna(),'historical_fallback',metadata['champion'])
+        target['model_training_cutoff']=metadata['training_cutoff']
+        target['occupancy_band']='unknown'
+        target['service_data_status']='not_provided'
         target=target.drop(columns=['date','is_weekend'])
         parts.append(target)
     result=pd.concat(parts,ignore_index=True)

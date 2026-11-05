@@ -27,9 +27,12 @@ python run.py train --kind segments --input artifacts/segments/segments.parquet 
 python run.py profiles --input data/hourly.parquet --model-dir artifacts/boardings
 python run.py profiles --input artifacts/segments/segments.parquet --model-dir artifacts/segment_model --output artifacts/segment_profiles.parquet
 python run.py plan --flows 420 300 200 --trips 6 --target-load 40
+python run.py reallocate --donor-flows 80 60 --donor-trips 4 --receiver-flows 420 --receiver-trips 6
 ```
 
 `plan` takes **section passenger crossings**, not ticket boardings. Its numbers are conditional service arithmetic. Without validated section timing/service data, do not treat the segment proxy as measured bus occupancy.
+
+For later daily data, repeat ingestion and profile generation with a new `--cutoff`. To retrain without overwriting an evaluated model, use `python run.py refit --cutoff YYYY-MM-DD --output artifacts/candidate-YYYY-MM-DD`. This reuses frozen settings and creates an unpromoted candidate; later-date validation is still required. The `train` command is the fixed March experiment, not an automatic production promotion job.
 
 Use `scripts/verify_data.py --audit ../analysis/etm_profile.json` to cross-check ingestion against the earlier independent CSV audit. Changed daily inputs replace their aggregate partitions; unchanged files are skipped. Complete ETM days must be available before running evaluation.
 

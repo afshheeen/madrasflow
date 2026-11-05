@@ -53,7 +53,7 @@ class PipelineTests(unittest.TestCase):
 
     def test_section_reconstruction_and_model_roundtrip(self):
         from madrasflow.segments import build_segments
-        from madrasflow.forecast import train_and_evaluate,export_profiles
+        from madrasflow.forecast import train_and_evaluate,export_profiles,refit_candidate
         with tempfile.TemporaryDirectory(dir=TEST_TMP) as temp:
             root=Path(temp)
             (root/'partitions').mkdir()
@@ -73,5 +73,9 @@ class PipelineTests(unittest.TestCase):
             result=train_and_evaluate(root/'segments'/'segments.parquet',root/'model','segments',rounds=5)
             self.assertEqual(result['test']['baseline']['rows'],7*24*2)
             self.assertEqual(export_profiles(root/'segments'/'segments.parquet',root/'model',root/'profiles.parquet'),2*24*2)
+            refit_candidate(root/'segments'/'segments.parquet',root/'model',root/'candidate','2026-03-31')
+            self.assertEqual(load_json(root/'candidate'/'model_metadata.json')['status'],'candidate_requires_later_date_validation')
+            with self.assertRaises(ValueError):
+                refit_candidate(root/'segments'/'segments.parquet',root/'model',root/'model','2026-03-31')
 
 if __name__=='__main__': unittest.main()

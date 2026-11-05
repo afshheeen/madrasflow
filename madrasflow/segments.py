@@ -82,10 +82,22 @@ def build_segments(data, output, train_end='2026-03-14', routes=10):
         FROM cohort GROUP BY date ORDER BY date''').fetchdf().replace({np.nan:None}).to_dict('records')
     total=con.execute('SELECT sum(passengers) FROM cohort').fetchone()[0]
     reconstructed=con.execute('SELECT sum(passengers) FROM journeys').fetchone()[0]
+    # Mask known destinations on later validation dates: assess the imputation rule
+    # without pretending it proves accuracy for the systematically missing group.
+    con.execute('''CREATE TEMP TABLE destination_predictions AS SELECT route_id,from_stage,
+        arg_max(to_stage,probability) top_destination,
+        sum(to_stage*probability) expected_destination FROM probabilities GROUP BY ALL''')
+    masked=con.execute(f'''SELECT sum(c.passengers) evaluated_known_passengers,
+        sum(CASE WHEN c.to_stage=p.top_destination THEN c.passengers ELSE 0 END)/sum(c.passengers) top_destination_accuracy,
+        sum(CASE WHEN p.top_destination IS NULL THEN c.passengers ELSE 0 END)/sum(c.passengers) unsupported_origin_fraction,
+        sum(abs(c.to_stage-p.expected_destination)*c.passengers)/nullif(sum(c.passengers) FILTER(WHERE p.top_destination IS NOT NULL),0) mean_absolute_stage_number_error
+        FROM cohort c LEFT JOIN destination_predictions p USING(route_id,from_stage)
+        WHERE c.date>{end} AND c.date<=DATE '2026-03-21' AND (c.to_stage-c.from_stage)*c.orientation>0''').fetchdf().replace({np.nan:None}).to_dict('records')[0]
     report={'training_cutoff':train_end,'routes_selected':selected,'section_count':n,
         'cohort_passengers':total,'reconstructed_journey_passengers':reconstructed,
         'unreconstructed_journey_passengers':total-reconstructed,'daily_coverage':coverage,
         'crossing_reconciliation':{'expected':expected,'actual':actual,'passed':True},
+        'masked_known_destination_validation':masked,
         'destination_method':'Training-only empirical distribution by route variant and boarding stage; no unsupported fallback',
         'label_kind':'estimated_stage_interval_passenger_crossings_by_boarding_hour',
         'limitations':['Stage intervals are not yet matched to geographic stop-to-stop segments',

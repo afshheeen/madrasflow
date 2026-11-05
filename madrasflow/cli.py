@@ -24,12 +24,25 @@ def main():
     profiles.add_argument('--model-dir',default='artifacts/boardings')
     profiles.add_argument('--output',default='artifacts/weekday_weekend_profiles.parquet')
     profiles.add_argument('--cutoff',default='2026-03-31')
+    refit=sub.add_parser('refit',help='Train a separate candidate through a new completed cutoff; does not promote it')
+    refit.add_argument('--input',default='data/hourly.parquet')
+    refit.add_argument('--approved-model-dir',default='artifacts/boardings')
+    refit.add_argument('--output',required=True)
+    refit.add_argument('--cutoff',required=True)
     plan=sub.add_parser('plan',help='Conditional minimum service; flows must describe section crossings')
     plan.add_argument('--flows',type=float,nargs='+',required=True)
     plan.add_argument('--trips',type=int,required=True)
     plan.add_argument('--target-load',type=float,default=40)
     plan.add_argument('--cycle-minutes',type=float)
     plan.add_argument('--output',default='artifacts/scenario.json')
+    transfer=sub.add_parser('reallocate',help='Check a conditional spare-trip transfer and protect donor service')
+    transfer.add_argument('--donor-flows',type=float,nargs='+',required=True)
+    transfer.add_argument('--donor-trips',type=int,required=True)
+    transfer.add_argument('--receiver-flows',type=float,nargs='+',required=True)
+    transfer.add_argument('--receiver-trips',type=int,required=True)
+    transfer.add_argument('--transfer',type=int,default=1)
+    transfer.add_argument('--target-load',type=float,default=40)
+    transfer.add_argument('--output',default='artifacts/reallocation.json')
     args=parser.parse_args()
     if args.command=='ingest':
         from .ingest import ingest,hourly_table
@@ -44,9 +57,18 @@ def main():
     elif args.command=='profiles':
         from .forecast import export_profiles
         print('Exported profile rows:',export_profiles(args.input,args.model_dir,args.output,args.cutoff))
+    elif args.command=='refit':
+        from .forecast import refit_candidate
+        print('Saved candidate:',refit_candidate(args.input,args.approved_model_dir,args.output,args.cutoff))
     elif args.command=='plan':
         from .planning import scenario
         result=scenario(args.flows,args.trips,args.target_load,args.cycle_minutes)
+        write_json(args.output,result)
+        print(result)
+    elif args.command=='reallocate':
+        from .planning import reallocate
+        result=reallocate(args.donor_flows,args.donor_trips,args.receiver_flows,args.receiver_trips,
+                          args.transfer,args.target_load)
         write_json(args.output,result)
         print(result)
 
