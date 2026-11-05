@@ -33,12 +33,21 @@ def ingest(source, output, limit=None):
             SELECT id, duty_date, date, time, ticket_type, passenger_count,
                    direction, Trip_Origin, Trip_Destination, from_stage, to_stage,
                    source, destination, fleet_no, waybill_no, trip_no
-            FROM read_csv({literal(path)},header=true,all_varchar=true,strict_mode=true)""")
+            FROM read_csv({literal(path)},header=true,all_varchar=true,strict_mode=true,
+                          delim=',',quote='"',escape='"')""")
         raw_rows=con.execute('SELECT count(*) FROM raw').fetchone()[0]
-        duplicates=con.execute('''SELECT id,duty_date,count(*) AS n,
+        duplicate_keys=con.execute('''SELECT id,duty_date,count(*) AS n
+            FROM raw GROUP BY id,duty_date HAVING count(*)>1''').fetchall()
+        duplicates=[]
+        if duplicate_keys:
+            con.execute('''CREATE OR REPLACE TEMP TABLE duplicate_keys AS
+                SELECT id,duty_date FROM raw GROUP BY id,duty_date HAVING count(*)>1''')
+            duplicates=con.execute('''SELECT r.id,r.duty_date,count(*) AS n,
             count(DISTINCT (date,time,ticket_type,passenger_count,direction,Trip_Origin,
             Trip_Destination,from_stage,to_stage,source,destination,fleet_no,waybill_no,trip_no)) AS variants
-            FROM raw GROUP BY id,duty_date HAVING count(*)>1''').fetchall()
+            FROM raw r JOIN duplicate_keys k ON r.id IS NOT DISTINCT FROM k.id
+                AND r.duty_date IS NOT DISTINCT FROM k.duty_date
+            GROUP BY r.id,r.duty_date''').fetchall()
         conflicts=sum(r[3]>1 for r in duplicates)
         if conflicts:
             raise ValueError(f'{path.name}: {conflicts} conflicting transaction keys; ingestion stopped')

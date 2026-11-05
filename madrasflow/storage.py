@@ -7,6 +7,7 @@ def connection(path=':memory:'):
     con.execute("SET threads=4")
     con.execute("SET memory_limit='2GB'")
     con.execute("SET preserve_insertion_order=false")
+    con.execute("SET enable_progress_bar=false")
     return con
 
 def literal(value):

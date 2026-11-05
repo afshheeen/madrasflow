@@ -5,6 +5,7 @@ Credentials are passed in memory and never written or printed.
 import argparse
 import json
 import subprocess
+import os
 import urllib.request
 import urllib.error
 from pathlib import Path
@@ -25,6 +26,24 @@ def main():
     if not token:
         raise SystemExit('No GitHub credential available for the requested account.')
     def api(path, data=None):
+        if os.name=='nt':
+            # Windows curl uses the OS certificate store (including managed roots).
+            # Headers and payload travel on stdin, never in command-line arguments.
+            config='url = '+json.dumps('https://api.github.com'+path)+'\n'
+            for value in ['Authorization: Bearer '+token,'Accept: application/vnd.github+json',
+                          'User-Agent: madrasflow-setup','X-GitHub-Api-Version: 2022-11-28',
+                          'Content-Type: application/json']:
+                config+='header = '+json.dumps(value)+'\n'
+            if data is not None:
+                config+='data = '+json.dumps(json.dumps(data))+'\n'
+            curl=Path(os.environ.get('SystemRoot','C:/Windows'))/'System32'/'curl.exe'
+            response=subprocess.run([str(curl),'--silent','--show-error','--config','-',
+                                     '--write-out','\n%{http_code}'],input=config,
+                                    capture_output=True,text=True,check=True)
+            body,status=response.stdout.rsplit('\n',1)
+            if int(status)>=400:
+                raise RuntimeError(f'GitHub API returned HTTP {status} for {path}')
+            return json.loads(body)
         req=urllib.request.Request('https://api.github.com'+path,
             data=json.dumps(data).encode() if data is not None else None,
             headers={'Authorization':'Bearer '+token,'Accept':'application/vnd.github+json',
