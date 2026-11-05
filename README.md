@@ -50,6 +50,17 @@ Raw data, prepared datasets, model files, credentials and local dependencies are
 
 ## Scope
 
-The working code covers ingestion, forecasting, stage-interval estimation and conditional service scenarios. Geographic stage-to-map matching, verified crossing-hour occupancy, mobile driver UI and a manager dashboard are subsequent integration work. Missing values do not imply a free section. The two forecast methods are a weekday/weekend historical benchmark and pooled XGBoost; PCA and K-means are intentionally absent.
+The working code covers ingestion, forecasting, stage-interval estimation, conditional service scenarios, the Marina Ops dashboard, mobile reports and a grounded evidence explainer. Supplied GIS shapes match all ten pilot route variants; only seven of 118 stage intervals have automatic geographic matches, and these still need review. Unmapped roads remain grey; the colored stage strip/list is explicitly schematic. Verified crossing-hour occupancy and physically feasible dispatch remain unavailable.
+
+## Dashboard
+
+```powershell
+python scripts/build_dashboard_data.py
+python run.py serve --port 8765
+```
+
+Open http://127.0.0.1:8765/ and `/driver.html`. Local API reports are shared through SQLite. A hosted static snapshot uses browser-local reports only; it does not synchronize phones/managers. See [dashboard and map setup](docs/dashboard-and-maps.md) for the API contract, OpenStreetMap/Google setup, mobile access and limitations.
+
+The frontend reads exported model profiles and uses explicit assumed trips/hour. Its colors are planning load proxies, not measured crowding. The selected method remains the historical weekday/weekend profile. A baseline-anchored XGBoost challenger did not improve validation; [refinement results](reports/refinement.json) preserve that outcome. PCA and K-means are not included because they do not resolve missing destinations or section/service timing.
 
 See [methodology](docs/methodology.md) for target definitions, evaluation splits and limitations.

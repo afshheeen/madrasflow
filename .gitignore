@@ -4,6 +4,8 @@
 __pycache__/
 *.pyc
 data/
+!web/dist/data/
+!web/dist/data/snapshot.json
 artifacts/
 *.duckdb*
 .env

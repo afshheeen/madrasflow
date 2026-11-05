@@ -43,7 +43,13 @@ def main():
     transfer.add_argument('--transfer',type=int,default=1)
     transfer.add_argument('--target-load',type=float,default=40)
     transfer.add_argument('--output',default='artifacts/reallocation.json')
+    server=sub.add_parser('serve',help='Run the connected dashboard and local operations API')
+    server.add_argument('--host',default='127.0.0.1')
+    server.add_argument('--port',type=int,default=8765)
     args=parser.parse_args()
+    if args.command=='serve':
+        from .dashboard import serve
+        return serve(args.host,args.port)
     if args.command=='ingest':
         from .ingest import ingest,hourly_table
         ingest(args.source,args.data,args.limit)

@@ -1,0 +1,67 @@
+{
+  "method": "XGBoost count corrections anchored at log historical mean",
+  "validation": {
+    "baseline": {
+      "rows": 497640,
+      "actual_passengers": 17243975.0,
+      "mae": 11.971179405361287,
+      "wape": 0.3454735766715036,
+      "mean_signed_error": 1.1677666579562032,
+      "underpredicted_passengers": 2688105.159809333
+    },
+    "anchored_xgboost": {
+      "rows": 497640,
+      "actual_passengers": 17243975.0,
+      "mae": 11.979900251793326,
+      "wape": 0.3457252496192108,
+      "mean_signed_error": 1.192704020040423,
+      "underpredicted_passengers": 2684070.1663847575
+    }
+  },
+  "busy_validation": {
+    "baseline": {
+      "rows": 124410,
+      "actual_passengers": 7473156.0,
+      "mae": 19.525532144435264,
+      "wape": 0.32505295675470863,
+      "mean_signed_error": 1.9673467191364893,
+      "underpredicted_passengers": 1092206.9243807103
+    },
+    "anchored_xgboost": {
+      "rows": 124410,
+      "actual_passengers": 7473156.0,
+      "mae": 19.531589340976637,
+      "wape": 0.3251537944492131,
+      "mean_signed_error": 1.9966372703919066,
+      "underpredicted_passengers": 1090761.6935507231
+    }
+  },
+  "selected_on_validation": "baseline",
+  "selected_rounds": 4,
+  "fresh_audit_dates": [
+    "2026-03-29",
+    "2026-03-30",
+    "2026-03-31"
+  ],
+  "fresh_audit": {
+    "baseline": {
+      "rows": 208368,
+      "actual_passengers": 7182806.0,
+      "mae": 11.854965919377332,
+      "wape": 0.34390397550606483,
+      "mean_signed_error": 1.4051911591952786,
+      "underpredicted_passengers": 1088699.333614807
+    },
+    "anchored_xgboost": {
+      "rows": 208368,
+      "actual_passengers": 7182806.0,
+      "mae": 11.84661767399379,
+      "wape": 0.34366179895360366,
+      "mean_signed_error": 1.4023668925211983,
+      "underpredicted_passengers": 1088123.8234169406
+    }
+  },
+  "selection_rule": "Improve validation MAE without worsening busy-hour MAE; no selection using audit scores",
+  "original_test_not_reused": "March22\u201328 had already been inspected; revised audit is March29\u201331, only three days",
+  "limitation": "Boarding forecasts only; does not independently validate crowding or destinations"
+}
