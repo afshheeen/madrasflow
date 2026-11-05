@@ -1,0 +1,11 @@
+.deps/
+.venv/
+__pycache__/
+*.pyc
+data/
+artifacts/
+*.duckdb*
+.env
+.env.*
+!.env.example
+
