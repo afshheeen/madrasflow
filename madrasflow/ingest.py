@@ -75,10 +75,14 @@ def ingest(source, output, limit=None):
             FROM typed''')
         quality=con.execute('''SELECT quality,count(*) records,coalesce(sum(passengers) FILTER(WHERE isfinite(passengers)),0) passengers
             FROM classified GROUP BY quality''').fetchdf().to_dict('records')
-        con.execute('''CREATE OR REPLACE TEMP TABLE accepted AS
-            SELECT * EXCLUDE(rn) FROM (
+        accepted_source="SELECT * FROM classified WHERE quality='accepted'"
+        if duplicates:
+            accepted_source='''SELECT * EXCLUDE(rn) FROM (
                 SELECT *,row_number() OVER(PARTITION BY duty,id ORDER BY id) rn FROM classified WHERE quality='accepted'
-            ) WHERE rn=1''')
+            ) WHERE rn=1'''
+        con.execute('''CREATE OR REPLACE TEMP TABLE accepted AS
+            SELECT ticket_ts,passengers,route_direction,origin,terminus,board_stage,alight_stage,source,destination
+            FROM ('''+accepted_source+')')
         accepted_count, accepted_pax=con.execute('SELECT count(*),coalesce(sum(passengers),0) FROM accepted').fetchone()
         con.execute('''CREATE OR REPLACE TEMP TABLE aggregate AS SELECT
             cast(ticket_ts AS DATE) AS date, cast(hour(ticket_ts) AS INTEGER) AS hour,

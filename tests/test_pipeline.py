@@ -10,9 +10,12 @@ from madrasflow.ingest import ingest
 from madrasflow.storage import connection, load_json
 from madrasflow.forecast import features
 
+TEST_TMP=Path(__file__).resolve().parents[1]/'artifacts'/'test_tmp'
+TEST_TMP.mkdir(parents=True,exist_ok=True)
+
 class PipelineTests(unittest.TestCase):
     def test_quote_spillover_reconciliation_and_idempotence(self):
-        with tempfile.TemporaryDirectory() as temp:
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as temp:
             root=Path(temp)
             path=root/'Ticket-Data-2026-03-01.csv'
             fields=['id','duty_date','date','time','ticket_type','passenger_count','direction',
@@ -47,5 +50,28 @@ class PipelineTests(unittest.TestCase):
         target['passengers']=0
         pd.testing.assert_frame_equal(x,features(history,target,['R']))
         with self.assertRaises(ValueError): features(pd.concat([history,target]),target,['R'])
+
+    def test_section_reconstruction_and_model_roundtrip(self):
+        from madrasflow.segments import build_segments
+        from madrasflow.forecast import train_and_evaluate,export_profiles
+        with tempfile.TemporaryDirectory(dir=TEST_TMP) as temp:
+            root=Path(temp)
+            (root/'partitions').mkdir()
+            rows=[]
+            for day in pd.date_range('2026-03-01','2026-03-31'):
+                for a,b,p in [(3,1,10.),(3,None,10.),(2,1,3.)]:
+                    rows.append({'date':day,'hour':8,'route_id':'R','route_direction':'R - DOWN',
+                                 'origin':'C','terminus':'A','from_stage':a,'to_stage':b,'passengers':p})
+            con=connection()
+            con.register('fixture',pd.DataFrame(rows))
+            con.execute('COPY fixture TO ? (FORMAT PARQUET)',[str(root/'partitions'/'fixture.parquet')])
+            con.close()
+            report=build_segments(root,root/'segments',routes=1)
+            self.assertEqual(report['section_count'],2)
+            self.assertAlmostEqual(report['crossing_reconciliation']['actual'],31*43)
+            self.assertEqual(report['routes_selected'][0]['orientation'],-1)
+            result=train_and_evaluate(root/'segments'/'segments.parquet',root/'model','segments',rounds=5)
+            self.assertEqual(result['test']['baseline']['rows'],7*24*2)
+            self.assertEqual(export_profiles(root/'segments'/'segments.parquet',root/'model',root/'profiles.parquet'),2*24*2)
 
 if __name__=='__main__': unittest.main()

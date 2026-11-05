@@ -16,7 +16,9 @@ def literal(value):
 def write_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, default=str, allow_nan=False), encoding='utf-8')
+    temp=path.with_suffix(path.suffix+'.tmp')
+    temp.write_text(json.dumps(value, indent=2, default=str, allow_nan=False), encoding='utf-8')
+    temp.replace(path)
 
 def load_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8'))

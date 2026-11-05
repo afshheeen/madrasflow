@@ -2,7 +2,10 @@
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).parent / '.deps'))
+deps=Path(__file__).parent / '.deps'
+abi=deps/'python_abi.txt'
+if abi.exists() and abi.read_text().strip()==f'{sys.version_info.major}.{sys.version_info.minor}':
+    sys.path.insert(0,str(deps))
 from madrasflow.cli import main
 
 if __name__ == '__main__':

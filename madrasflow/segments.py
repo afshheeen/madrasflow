@@ -14,7 +14,7 @@ def build_segments(data, output, train_end='2026-03-14', routes=10):
     con.execute(f"CREATE TEMP VIEW od AS SELECT * FROM read_parquet({literal(data/'partitions'/'*.parquet')})")
     end=literal(train_end)
     con.execute(f'''CREATE TEMP TABLE evidence AS SELECT route_id,route_direction,origin,terminus,
-        sum(passengers) passengers,count(DISTINCT date) days,
+        sum(passengers) passengers,count(DISTINCT date) observed_days,
         sum(passengers) FILTER(WHERE to_stage>from_stage) increasing,
         sum(passengers) FILTER(WHERE to_stage<from_stage) decreasing
         FROM od WHERE date<={end} GROUP BY ALL''')
@@ -22,7 +22,7 @@ def build_segments(data, output, train_end='2026-03-14', routes=10):
         CASE WHEN coalesce(increasing,0)>=coalesce(decreasing,0) THEN 1 ELSE -1 END orientation,
         greatest(coalesce(increasing,0),coalesce(decreasing,0)) /
         nullif(coalesce(increasing,0)+coalesce(decreasing,0),0) orientation_agreement
-        FROM evidence WHERE days>=10''')
+        FROM evidence WHERE observed_days>=10''')
     con.execute(f'''CREATE TEMP TABLE stages AS SELECT DISTINCT route_id,stage FROM (
         SELECT route_id,from_stage stage FROM od WHERE date<={end}
         UNION SELECT route_id,to_stage stage FROM od WHERE date<={end})
@@ -39,7 +39,7 @@ def build_segments(data, output, train_end='2026-03-14', routes=10):
     n=con.execute('SELECT count(*) FROM sections').fetchone()[0]
     if not n: raise ValueError('No route variants meet training-only stage coverage requirements')
     con.execute(f'''CREATE TEMP TABLE destinations AS SELECT route_id,from_stage,to_stage,
-        sum(passengers) passengers FROM od JOIN selected USING(route_id)
+        sum(od.passengers) passengers FROM od JOIN selected USING(route_id)
         WHERE date<={end} AND (to_stage-from_stage)*orientation>0
         GROUP BY route_id,from_stage,to_stage''')
     con.execute('''CREATE TEMP TABLE probabilities AS SELECT *,
@@ -75,7 +75,7 @@ def build_segments(data, output, train_end='2026-03-14', routes=10):
         FROM journeys j''').fetchone()[0]
     actual=con.execute('SELECT sum(passengers) FROM flow').fetchone()[0]
     if not np.isclose(expected,actual,rtol=1e-9): raise AssertionError('Section crossing reconciliation failed')
-    selected=con.execute('SELECT * FROM selected ORDER BY passengers DESC').fetchdf().to_dict('records')
+    selected=con.execute('SELECT * FROM selected ORDER BY passengers DESC').fetchdf().replace({np.nan:None}).to_dict('records')
     coverage=con.execute('''SELECT date,sum(passengers) total_passengers,
         sum(passengers) FILTER(WHERE (to_stage-from_stage)*orientation>0) known_valid_destination_passengers,
         sum(passengers) FILTER(WHERE to_stage IS NULL) missing_destination_passengers

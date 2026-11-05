@@ -1,0 +1,6 @@
+# Versions used for the initial Windows/Python 3.12 verification run.
+duckdb==2.0.0
+xgboost==3.4.1
+numpy==2.3.5
+pandas==3.0.1
+scipy==1.18.1
